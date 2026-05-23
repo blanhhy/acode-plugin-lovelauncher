@@ -22,9 +22,14 @@ export default function BuildPlugin(plugin) {
 }
 
 async function startBuild(plugin) {
+  if (!plugin.output) {
+    plugin.output = path.join(plugin.outdir || 'dist', plugin.outfile || 'main.js');
+  }
   const OUTDIR_PATH = path.dirname(plugin.output);
   const OUTFILE_PATH = path.basename(plugin.output);
 
+  plugin.outdir = OUTDIR_PATH;
+  plugin.outfile = OUTFILE_PATH;
   plugin.main = OUTFILE_PATH;
   delete plugin.entry;
   delete plugin.output;
@@ -128,15 +133,18 @@ async function getLicense(license) {
 }
 
 async function createZipArchive(sourceDir, zipFileName) {
+  const tempFileName = zipFileName + '.tmp';
   return new Promise((resolve, reject) => {
-    const output = createWriteStream(zipFileName);
-    const archive = archiver('zip', { 
+    const output = createWriteStream(tempFileName);
+    const archive = archiver('zip', {
       zlib: { level: 6 },
       statConcurrency: 10
     });
     output.on('close', () => {
-      console.log(`📦 Created ${zipFileName} (${archive.pointer()} bytes)`);
-      resolve();
+      fs.rename(tempFileName, zipFileName).then(() => {
+        console.log(`📦 Created ${zipFileName} (${archive.pointer()} bytes)`);
+        resolve();
+      }).catch(reject);
     });
     archive.on('error', reject);
     archive.pipe(output);

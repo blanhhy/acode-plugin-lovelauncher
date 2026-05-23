@@ -19,7 +19,7 @@
     
     "entry": "src/main.js",
     "output": "dist/main.js",
-    "zip": "{name} v{version}.zip",
+    "zip": "lovelauncher-plugin-v{version}.zip",
 
     "files": ["./assets"],
     "icon": "assets/icon.png",
