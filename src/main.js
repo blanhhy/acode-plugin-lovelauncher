@@ -5,6 +5,11 @@ const fsOperation = acode.require("fsOperation");
 const commands = acode.require("commands");
 const projects = acode.require("projects");
 
+/**
+ * @param {fsOperation} projDir 项目目录FS
+ * @param {string} baseUrl 项目基础URL
+ * @returns {Promise<Record<string, Uint8Array>>} 文件内容映射
+ */
 async function scanProj(projDir, baseUrl) {
     const dataMap = {};
     const files = await projDir.lsDir();
@@ -13,10 +18,10 @@ async function scanProj(projDir, baseUrl) {
             const subDM = await scanProj(file.url, baseUrl);
             Object.assign(dataMap, subDM);
         } else if (file.isFile) {
-            const currFs = await fsOperation(file.url);
+            const currFs = fsOperation(file.url);
             const content = await currFs.readFile();
             const relPath = file.url
-                .substring(baseDir.length)
+                .substring(baseUrl.length)
                 .replace(/^\/+/, "");
             dataMap[relPath] = new Uint8Array(content);
         }
@@ -57,7 +62,10 @@ class LoveLauncher {
         projects.set("LÖVE", getTemplate, icon);
     }
 
-    // 打包Love文件
+    /**
+     * @param {fsOperation} projDir 项目目录FS
+     * @returns {Promise<string>} 输出路径
+     */
     async packLove(projDir) {
         const stat = await projDir.stat();
         const name = stat.name;
@@ -68,20 +76,22 @@ class LoveLauncher {
         const dataMap = await scanProj(projDir, baseUrl);
         const blobZip = zipSync(dataMap);
         
-        const fsZip = await fsOperation(outPath);
-        fsZip.writeFile(blobZip);
+        const fsZip = fsOperation(outPath);
+        await fsZip.writeFile(blobZip);
         return outPath;
     }
 
-    /* initCommand() {
+    initCommand() {
         commands.addCommand({
             name: "lovelauncher.packlove",
             description: "LÖVE Launcher: Pack current projrct",
-            exec: (editor) => {
-                
+            exec: async (editor) => {
+                const projDir = fsOperation(editor.file.url);
+                const outPath = await this.packLove(projDir);
+                editor.showMessage(`Love file packed: ${outPath}`);
             }
         });
-    } */
+    }
 
     initListener() {
         
