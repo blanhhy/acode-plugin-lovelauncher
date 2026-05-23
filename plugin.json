@@ -1,4 +1,4 @@
-{dcv
+{
     "name": "LÖVE Launcher",
     "id": "acode.plugin.lovelauncher",
     "descridption": "create love2d projects and launch the love.apk in android.",
