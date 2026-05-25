@@ -75,7 +75,7 @@ class LoveLauncher {
      * @returns {Promise<Record<string, Uint8Array>>} 文件映射
      */
     async collectFilesFromConfig(baseUrl) {
-        const configPath = Url.join(baseUrl,".acode/pack_files.json");
+        const configPath = Url.join(baseUrl, ".acode/pack_files.json");
         const configFs = await FS(configPath);
         const configExists = await configFs.exists();
         if (!configExists) {
@@ -109,8 +109,7 @@ class LoveLauncher {
             const stat = await item.stat();
             if (stat.isFile) {
                 const content = await item.readFile();
-                // 相对路径已经由用户提供，直接用 relPath（注意去除开头的 /）
-                const key = relPath.replace(/^\/+/, "");
+                const key = relPath.replace(/^\/+/, ""); // 去除'/'前缀
                 dataMap[key] = new Uint8Array(content);
             } else if (stat.isDirectory) {
                 await this.addDirectoryToMap(absolutePath, baseUrl, dataMap);
@@ -145,7 +144,7 @@ class LoveLauncher {
     }
 
     async checkProj(baseUrl) {
-        const url = Url.join(baseUrl,".acode/PROJTYPE");
+        const url = Url.join(baseUrl, ".acode/PROJTYPE");
         const pt = await FS(url);
         const existing = await pt.exists();
         if (!existing) {
@@ -160,7 +159,7 @@ class LoveLauncher {
         }
         const content = await pt.readFile("utf8");
         if (!content) {
-            console.log(`[Project] Failed to read ${url}`);
+            console.warn(`[Project] Failed to read ${url}`);
             return false;
         }
         return content.includes("LOVE2D");
@@ -177,8 +176,7 @@ class LoveLauncher {
             return;
         }
 
-        const url = folder.url;
-        const baseUrl = url.at(-1) === "/" ? url : url + "/";
+        const baseUrl = folder.url;
         const isLoveProj = await this.checkProj(baseUrl);
 
         if (!isLoveProj) {
