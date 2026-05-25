@@ -6,7 +6,7 @@
     "price": 0,
     
     "author": {
-        "email": "",
+        "email": "balancestar676@qq.com",
         "github": "blanhhy",
         "name": "Sharan Rai",
         "url": "https://github.com/blanhhy"
@@ -14,7 +14,7 @@
 
     "version": "1.0.0",
     "minVersionCode": 967,
-    "repository": "",
+    "repository": "https://github.com/blanhhy/acode-plugin-lovelauncher",
     "license": "MIT",
     
     "entry": "src/main.js",
