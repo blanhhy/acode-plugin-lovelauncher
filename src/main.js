@@ -5,6 +5,7 @@ const openFolder = acode.require("openFolder");
 const commands = acode.require("commands");
 const projects = acode.require("projects");
 const alert = acode.require("alert");
+const Url = acode.require("Url");
 const FS = acode.require("fs");
 
 class LoveLauncher {
@@ -74,7 +75,7 @@ class LoveLauncher {
      * @returns {Promise<Record<string, Uint8Array>>} 文件映射
      */
     async collectFilesFromConfig(baseUrl) {
-        const configPath = baseUrl + ".acode/pack_files.json";
+        const configPath = Url.join(baseUrl,".acode/pack_files.json");
         const configFs = await FS(configPath);
         const configExists = await configFs.exists();
         if (!configExists) {
@@ -97,7 +98,7 @@ class LoveLauncher {
         const dataMap = {};
 
         for (const relPath of includeList) {
-            const absolutePath = baseUrl + relPath;
+            const absolutePath = Url.join(baseUrl, relPath);
             const item = await FS(absolutePath);
             const exists = await item.exists();
             if (!exists) {
@@ -133,7 +134,7 @@ class LoveLauncher {
         const stat = await projDir.stat();
         const name = stat.name + ".love";
 
-        const outPath = baseUrl + name;
+        const outPath = Url.join(baseUrl,name);
         const outFs = await FS(outPath);
 
         const existing = await outFs.exists();
@@ -144,7 +145,7 @@ class LoveLauncher {
     }
 
     async checkProj(baseUrl) {
-        const url = baseUrl + ".acode/PROJTYPE";
+        const url = Url.join(baseUrl,".acode/PROJTYPE");
         const pt = await FS(url);
         const existing = await pt.exists();
         if (!existing) {
@@ -154,6 +155,7 @@ class LoveLauncher {
         const stat = await pt.stat();
         if (!stat.isFile) {
             console.log(`[Project] ${url} is not a file`);
+            console.log(stat);
             return false;
         }
         const content = await pt.readFile("utf8");
