@@ -171,7 +171,7 @@ class LoveLauncher {
         if (!folder) {
             alert(
                 "Packaging Failed",
-                "No open projects found. Please open a Love2D project first.",
+                "Your current file is not from any project. Please open a Love2D project and code in it first.",
             );
             return;
         }
@@ -198,12 +198,12 @@ class LoveLauncher {
             return;
         }
 
-        window.toast("Packaging successful", 3000);
+        window.toast("Packaging LOVE successful!", 3000);
         folder.reload(); // 刷新文件列表
     }
 
     /* async runLove() {
-        // run .love file in love-android ...
+        // TODO: run .love file ...
     } */
 
     initCommand() {

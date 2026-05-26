@@ -98,20 +98,6 @@ Future updates may add direct launching once Acode improves its API.
 
 ---
 
-### Author
-
-- **Name**: Sharan Rai
-- **Email**: balancestar676@qq.com
-- **GitHub**: [blanhhy](https://github.com/blanhhy)
-
----
-
-### Repository
-
-[https://github.com/blanhhy/acode-plugin-lovelauncher](https://github.com/blanhhy/acode-plugin-lovelauncher)
-
----
-
 **Happy game developing with LÖVE!** ❤️
 
 Feel free to open issues or submit pull requests.
