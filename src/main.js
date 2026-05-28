@@ -1,14 +1,14 @@
 import plugin from "../plugin.json";
 import { zipSync } from "fflate";
 
-const openFolder = acode.require("openFolder");
-const commands = acode.require("commands");
-const projects = acode.require("projects");
-const alert = acode.require("alert");
-const Url = acode.require("Url");
-const FS = acode.require("fs");
+const openFolder = acode?.require("openFolder");
+const commands = acode?.require("commands");
+const projects = acode?.require("projects");
+const alert = acode?.require("alert");
+const Url = acode?.require("Url");
+const FS = acode?.require("fs");
 
-class LoveLauncher {
+class LoveLauncher {    
     async getAsset(name) {
         const res = await fetch(`${this.baseUrl}assets/${name}`);
         return res;
@@ -165,7 +165,7 @@ class LoveLauncher {
         return content.includes("LOVE2D");
     }
 
-    async runPackLove() {
+    async packProj() {
         const folder = openFolder.find(editorManager.activeFile.uri);
 
         if (!folder) {
@@ -188,7 +188,10 @@ class LoveLauncher {
         }
 
         try {
-            await this.packLove(baseUrl);
+            const path = await this.packLove(baseUrl);
+            toast("Packaging LOVE successful!", 3000);
+            folder.reload(); // 刷新文件列表
+            return path
         } catch (e) {
             console.error("Packaging error:", e);
             alert(
@@ -197,47 +200,82 @@ class LoveLauncher {
             );
             return;
         }
-
-        window.toast("Packaging LOVE successful!", 3000);
-        folder.reload(); // 刷新文件列表
     }
 
-    /* async runLove() {
-        // TODO: run .love file ...
-    } */
+    initRunButton() {
+        this.$runBtn = document.createElement("span");
+        this.$runBtn.className = "icon play_arrow";
+        this.$runBtn.setAttribute("action", "run");
+        this.$runBtn.onclick = () => this.runProj();
+        this.$runBtn.title = "Run Love";
 
+        const listener = async () => {
+            if (this.$runBtn.isConnected) {
+                this.$runBtn.remove();
+            }
+            const folder = openFolder.find(editorManager.activeFile.uri);
+            const isLoveProj = folder? await this.checkProj(folder.url): false;
+            if (isLoveProj) {
+                const $header = document.querySelector("#root")?.querySelector('header');
+                $header?.insertBefore(this.$runBtn, $header.lastChild);
+            }
+        }
+    
+        editorManager.on('switch-file', listener);
+        editorManager.on('rename-file', listener);
+
+        return listener()
+    }
+
+    // TODO: 实现love.js集成
+    // TODO: 给acode增加能构造Content Uri的api以使用love-android App
+    async runProj() {
+        const path = await this.packProj();
+        if (!path) { return; }
+        const name = Url.basename(path);
+        alert(
+            "Unfinished Feature",
+            `Packaging Successful! Your .love file is ${name}.\n\nHowever, running .love is still under development.`
+        )
+    }
+    
     initCommand() {
         commands.addCommand({
             name: "lovelauncher.packlove",
             description: "LÖVE Launcher: Pack current project",
-            exec: () => this.runPackLove(),
+            exec: () => this.packProj(),
         });
-    }
-
-    async init() {
-        this.initTemplate();
-        this.initCommand();
-    }
-
-    async destroy() {
-        commands.removeCommand("lovelauncher.packlove");
     }
 }
 
 
+// Main
 if (window.acode) {
-    const thisPlugin = new LoveLauncher();
-    acode.setPluginInit(
-        plugin.id,
-        async (baseUrl, $page, { cacheFileUrl, cacheFile }) => {
-            if (!baseUrl.endsWith("/")) {
-                baseUrl += "/";
-            }
-            thisPlugin.baseUrl = baseUrl;
-            await thisPlugin.init($page, cacheFile, cacheFileUrl);
-        },
-    );
-    acode.setPluginUnmount(plugin.id, () => {
-        thisPlugin.destroy();
-    });
+    const instance = new LoveLauncher();
+    
+    const init = async (baseUrl, $page, options) => {
+        if (!baseUrl.endsWith("/")) {
+            baseUrl += "/";
+        }
+        instance.baseUrl = baseUrl;
+        try {
+            instance.initTemplate();
+            instance.initCommand();
+            instance.initRunButton();
+        } catch(e) {
+            console.error("Error initializing LoveLauncher:", e);
+        }
+    }
+
+    const destroy = async () => {
+        try {
+            commands.removeCommand("lovelauncher.packlove");
+            instance.$runBtn.remove();
+        } catch(e) {
+            console.warn('Error cleaning up for LoveLauncher:', e);
+        }
+    }
+    
+    acode.setPluginInit(plugin.id, init);
+    acode.setPluginUnmount(plugin.id, destroy);
 }
