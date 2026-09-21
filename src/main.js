@@ -24,6 +24,7 @@ class LoveLauncher {
             return {
                 "conf.lua": await read("conf.lua"),
                 "main.lua": await read("main.lua"),
+                ".luarc.json": await read(".luarc.json"),
                 ".acode/PROJTYPE": "LOVE2D",
                 ".acode/pack_files.json": JSON.stringify([
                     "conf.lua",
