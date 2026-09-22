@@ -1,12 +1,21 @@
 import plugin from "../plugin.json";
 import { zipSync } from "fflate";
 
+const CLICK_RUN_PLUGIN_ID = "acode.plugin.clickrun";
 const openFolder = acode?.require("openFolder");
 const commands = acode?.require("commands");
 const projects = acode?.require("projects");
 const alert = acode?.require("alert");
 const Url = acode?.require("Url");
 const FS = acode?.require("fs");
+
+function logInfo(message) {
+    try {
+        log("info", `[lovelauncher] ${message}`);
+    } catch (_) {
+        console.log(`[lovelauncher] ${message}`);
+    }
+}
 
 class LoveLauncher {    
     async getAsset(name) {
@@ -166,9 +175,7 @@ class LoveLauncher {
         return content.includes("LOVE2D");
     }
 
-    async packProj() {
-        const folder = openFolder.find(editorManager.activeFile.uri);
-
+    async packProj(folder = openFolder.find(editorManager.activeFile?.uri)) {
         if (!folder) {
             alert(
                 "Packaging Failed",
@@ -203,35 +210,53 @@ class LoveLauncher {
         }
     }
 
-    initRunButton() {
-        this.$runBtn = document.createElement("span");
-        this.$runBtn.className = "icon play_arrow";
-        this.$runBtn.setAttribute("action", "run");
-        this.$runBtn.onclick = () => this.runProj();
-        this.$runBtn.title = "Run Love";
-
-        const listener = async () => {
-            if (this.$runBtn.isConnected) {
-                this.$runBtn.remove();
-            }
-            const folder = openFolder.find(editorManager.activeFile.uri);
-            const isLoveProj = folder? await this.checkProj(folder.url): false;
-            if (isLoveProj) {
-                const $header = document.querySelector("#root")?.querySelector('header');
-                $header?.insertBefore(this.$runBtn, $header.lastChild);
-            }
+    initRunner() {
+        const runButton = acode.require("runButton");
+        if (runButton) {
+            this.useRunButton(runButton);
+            return;
         }
-    
-        editorManager.on('switch-file', listener);
-        editorManager.on('rename-file', listener);
 
-        return listener()
+        logInfo("Click Run is not loaded yet, waiting for it...");
+        if (typeof acode.waitForPlugin !== "function") {
+            logInfo("acode.waitForPlugin is unavailable, the run button is disabled");
+            return;
+        }
+
+        acode.waitForPlugin(CLICK_RUN_PLUGIN_ID)
+            .then(() => {
+                const api = acode.require("runButton");
+                if (api) {
+                    this.useRunButton(api);
+                } else {
+                    logInfo("Click Run is loaded but has no runButton module");
+                }
+            })
+            .catch(() => {
+                logInfo("Click Run is not installed, the run button is disabled");
+            });
+    }
+
+    useRunButton(runButton) {
+        if (this.destroyed) return;
+
+        logInfo("registering the LÖVE project runner with Click Run");
+        this.disposeRunner = runButton.registerProjectRunner({
+            id: "lovelauncher.project",
+            name: "Run LÖVE",
+            runnable: (context) => this.checkLoveProject(context),
+            run: (context) => this.runProj(context.folder),
+        });
+    }
+
+    async checkLoveProject(context) {
+        return !!context.folder && await this.checkProj(context.folder.url);
     }
 
     // TODO: 实现love.js集成
     // TODO: 给acode增加能构造Content Uri的api以使用love-android App
-    async runProj() {
-        const path = await this.packProj();
+    async runProj(folder) {
+        const path = await this.packProj(folder);
         if (!path) { return; }
         const name = Url.basename(path);
         alert(
@@ -259,10 +284,11 @@ if (window.acode) {
             baseUrl += "/";
         }
         instance.baseUrl = baseUrl;
+        instance.destroyed = false;
         try {
             instance.initTemplate();
             instance.initCommand();
-            instance.initRunButton();
+            instance.initRunner();
         } catch(e) {
             console.error("Error initializing LoveLauncher:", e);
         }
@@ -270,8 +296,9 @@ if (window.acode) {
 
     const destroy = async () => {
         try {
+            instance.destroyed = true;
             commands.removeCommand("lovelauncher.packlove");
-            instance.$runBtn.remove();
+            instance.disposeRunner?.();
         } catch(e) {
             console.warn('Error cleaning up for LoveLauncher:', e);
         }
