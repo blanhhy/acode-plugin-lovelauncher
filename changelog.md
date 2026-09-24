@@ -1,6 +1,6 @@
 ### `v1.0.2`
 
-- use the "Run" button of the Click Run plugin.
+- use the [**▶**] button of the [Click Run](https://acode.app/plugin/acode.plugin.clickrun) plugin.
 
 ### `v1.0.1`
 
