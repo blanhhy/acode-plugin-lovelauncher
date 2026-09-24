@@ -286,9 +286,9 @@ if (window.acode) {
                 info: "Use Click Run to show the run button",
             },
         ],
-        cb: (key) => {
+        cb: async (key) => {
             if (key === "install_click_run") {
-                acode.installPlugin(CLICK_RUN_PLUGIN_ID, plugin.name);
+                await acode.installPlugin(CLICK_RUN_PLUGIN_ID, plugin.name);
             }
         }
     }
