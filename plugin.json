@@ -24,5 +24,6 @@
     "files": ["./assets"],
     "icon": "assets/icon.png",
     "readme": "readme.md",
-    "changelogs": "changelogs.md"
+    "changelog": "changelog.md",
+    "changelogs": "changelog.md"
 }

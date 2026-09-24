@@ -1,6 +1,4 @@
-**LÖVE Launcher**  
-*Acode Plugin for LÖVE2D Game Development*
-
+**LÖVE on Acode**  
 ---
 
 ### Overview
@@ -9,25 +7,6 @@
 
 - A ready-to-use **LÖVE2D project template**
 - One-click **packaging** of your project into a `.love` file
-
-> **Note**: Due to current Acode API limitations, direct launching of `.love` files in **love-android** is not yet supported.
-
----
-
-### Features
-
-- Create new LÖVE2D projects directly from Acode’s “New Project” menu
-- Pack your project into a standard `.love` file
-- Customizable packaging via `.acode/pack_files.json`
-- Clean default template with basic `main.lua` and `conf.lua`
-
----
-
-### Installation
-
-1. Download the latest plugin from the [Releases](https://github.com/blanhhy/acode-plugin-lovelauncher/releases) page.
-2. Install it via **Acode → Plugins → Install from .zip**.
-3. Restart Acode.
 
 ---
 
@@ -43,19 +22,20 @@
 The plugin will automatically generate:
 - `main.lua`
 - `conf.lua`
-- `.acode/PROJTYPE` (internal marker)
-- `.acode/pack_files.json` (packaging configuration)
+- `.acode/PROJTYPE` 
+  (project type marker)
+- `.acode/pack_files.json`
+  (packaging configuration)
 
 #### 2. Packaging Your Project
 
 1. Make sure your LÖVE2D project is opened in Acode.
-2. Open the **Command Palette** (`Ctrl + Shift + P`).
+2. Open the Command Palette (`Ctrl + Shift + P`).
 3. Type and select: **LÖVE Launcher: Pack current project**
 4. A `.love` file will be generated in your project root (e.g. `MyGame.love`).
 
 > [!Note]
-> If [Click Run](https://acode.app/plugin/acode.plugin.clickrun) is installed,
-> simply click the "Run" button and select "Pack LÖVE".
+> If [Click Run](https://acode.app/plugin/acode.plugin.clickrun) is installed, simply click the **▶** button and select **Pack LÖVE**.
 
 ---
 
@@ -81,15 +61,15 @@ You can control which files and folders are included in the `.love` file by edit
 **Rules:**
 - You can list individual files or entire directories.
 - Directories are added recursively.
-- Non-existent paths are skipped with a warning.
+- Non-existent paths doesn't matter.
 
 ---
 
 ### Requirements
 
 - The project must be opened in Acode.
-- The currently active file must belong to a LÖVE2D project (detected via `.acode/PROJTYPE`).
-- Acode version compatible with `minVersionCode: 967` or higher.
+- The currently active file must belong to a LÖVE2D project.
+- Acode version `minVersionCode: 967` or higher.
 
 ---
 

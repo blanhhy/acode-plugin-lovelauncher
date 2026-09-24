@@ -239,18 +239,17 @@ class LoveLauncher {
 
     useRunButton(runButton) {
         if (this.destroyed) return;
-
         logInfo("registering the LÖVE project runner with Click Run");
+
+        const runnable = async (context) => !!context.folder && await this.checkProj(context.folder.url);
+        const run = async (context) => this.runProj(context.folder);
+
         this.disposeRunner = runButton.registerProjectRunner({
             id: "lovelauncher.project",
             name: "Pack LÖVE",
-            runnable: (context) => this.checkLoveProject(context),
-            run: (context) => this.runProj(context.folder),
+            runnable: runnable,
+            run: run,
         });
-    }
-
-    async checkLoveProject(context) {
-        return !!context.folder && await this.checkProj(context.folder.url);
     }
 
     // TODO: 实现love.js集成
@@ -260,7 +259,7 @@ class LoveLauncher {
         if (!path) { return; }
         const name = Url.basename(path);
         alert(
-            "Unfinished Feature",
+            "WIP: Running LÖVE",
             `Packaging Successful! Your .love file is ${name}.\n\nHowever, running .love is still under development.`
         )
     }
