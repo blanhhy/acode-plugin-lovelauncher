@@ -283,7 +283,7 @@ if (window.acode) {
             {
                 key: "install_click_run",
                 text: "Install Click Run",
-                prompt: "Use Click Run to show the run button",
+                info: "Use Click Run to show the run button",
             },
         ],
         cb: (key) => {
