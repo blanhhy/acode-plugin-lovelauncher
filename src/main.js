@@ -9,14 +9,6 @@ const alert = acode?.require("alert");
 const Url = acode?.require("Url");
 const FS = acode?.require("fs");
 
-function logInfo(message) {
-    try {
-        log("info", `[lovelauncher] ${message}`);
-    } catch (_) {
-        console.log(`[lovelauncher] ${message}`);
-    }
-}
-
 class LoveLauncher {    
     async getAsset(name) {
         const res = await fetch(`${this.baseUrl}assets/${name}`);
@@ -99,10 +91,10 @@ class LoveLauncher {
             const content = await configFs.readFile("utf8");
             includeList = JSON.parse(content);
             if (!Array.isArray(includeList)) {
-                throw new Error("pack_files.json must contain an array of paths.");
+                throw new Error("[LOVE Launcher] pack_files.json must contain an array of paths.");
             }
         } catch (e) {
-            throw new Error(`Failed to parse pack_files.json: ${e.message}`);
+            throw new Error(`[LOVE Launcher] Failed to parse pack_files.json: ${e.message}`);
         }
 
         const dataMap = {};
@@ -112,7 +104,7 @@ class LoveLauncher {
             const item = await FS(absolutePath);
             const exists = await item.exists();
             if (!exists) {
-                console.warn(`[Warning] Path does not exist, skipping: ${relPath}`);
+                console.warn(`[LOVE Launcher] Path does not exist, skipping: ${relPath}`);
                 continue;
             }
 
@@ -124,7 +116,7 @@ class LoveLauncher {
             } else if (stat.isDirectory) {
                 await this.addDirectoryToMap(absolutePath, baseUrl, dataMap);
             } else {
-                console.warn(`[Warning] Unknown entry type, skipping: ${relPath}`);
+                console.warn(`[LOVE Launcher] Unknown entry type, skipping: ${relPath}`);
             }
         }
 
@@ -201,7 +193,7 @@ class LoveLauncher {
             folder.reload(); // 刷新文件列表
             return path
         } catch (e) {
-            console.error("Packaging error:", e);
+            console.error("[LOVE Launcher] Packaging error:", e);
             alert(
                 "Packaging Failed",
                 `Project: ${folder.title}\nError: ${e.message}`,
@@ -216,30 +208,24 @@ class LoveLauncher {
             this.useRunButton(runButton);
             return;
         }
-
-        logInfo("Click Run is not loaded yet, waiting for it...");
-        if (typeof acode.waitForPlugin !== "function") {
-            logInfo("acode.waitForPlugin is unavailable, the run button is disabled");
-            return;
-        }
-
+        console.info("[LOVE Launcher] Click Run is not loaded yet, waiting for it...");
         acode.waitForPlugin(CLICK_RUN_PLUGIN_ID)
             .then(() => {
                 const api = acode.require("runButton");
                 if (api) {
                     this.useRunButton(api);
                 } else {
-                    logInfo("Click Run is loaded but has no runButton module");
+                    console.warn("[LOVE Launcher] Click Run is loaded but has no runButton module");
                 }
             })
             .catch(() => {
-                logInfo("Click Run is not installed, the run button is disabled");
+                console.warn("[LOVE Launcher] Click Run is not installed, the run button is disabled");
             });
     }
 
     useRunButton(runButton) {
         if (this.destroyed) return;
-        logInfo("registering the LÖVE project runner with Click Run");
+        console.info("[LOVE Launcher] registering the LÖVE project runner with Click Run");
 
         const runnable = async (context) => !!context.folder && await this.checkProj(context.folder.url);
         const run = async (context) => this.runProj(context.folder);
@@ -299,23 +285,15 @@ if (window.acode) {
         }
         instance.baseUrl = baseUrl;
         instance.destroyed = false;
-        try {
-            instance.initTemplate();
-            instance.initCommand();
-            instance.initRunner();
-        } catch(e) {
-            console.error("Error initializing LoveLauncher:", e);
-        }
+        instance.initTemplate();
+        instance.initCommand();
+        instance.initRunner();
     }
 
     const destroy = async () => {
-        try {
-            instance.destroyed = true;
-            commands.removeCommand("lovelauncher.packlove");
-            instance.disposeRunner?.();
-        } catch(e) {
-            console.warn('Error cleaning up for LoveLauncher:', e);
-        }
+        instance.destroyed = true;
+        commands.removeCommand("lovelauncher.packlove");
+        instance.disposeRunner?.();
     }
     
     acode.setPluginInit(plugin.id, init, settings);
