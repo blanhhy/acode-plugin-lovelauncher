@@ -61,7 +61,7 @@ You can control which files and folders are included in the `.love` file by edit
 **Rules:**
 - You can list individual files or entire directories.
 - Directories are added recursively.
-- Non-existent paths doesn't matter.
+- Non-existent paths don't matter.
 
 ---
 
