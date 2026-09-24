@@ -277,6 +277,21 @@ class LoveLauncher {
 // Main
 if (window.acode) {
     const instance = new LoveLauncher();
+
+    const settings = {
+        list: [
+            {
+                key: "install_click_run",
+                text: "Install Click Run",
+                prompt: "Use Click Run to show the run button",
+            },
+        ],
+        cb: (key) => {
+            if (key === "install_click_run") {
+                acode.installPlugin(CLICK_RUN_PLUGIN_ID, plugin.name);
+            }
+        }
+    }
     
     const init = async (baseUrl, $page, options) => {
         if (!baseUrl.endsWith("/")) {
@@ -303,6 +318,6 @@ if (window.acode) {
         }
     }
     
-    acode.setPluginInit(plugin.id, init);
+    acode.setPluginInit(plugin.id, init, settings);
     acode.setPluginUnmount(plugin.id, destroy);
 }
