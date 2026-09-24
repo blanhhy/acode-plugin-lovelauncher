@@ -1,5 +1,3 @@
-# ChangeLogs
-
 ### `v1.0.2`
 
 - use the "Run" button of the Click Run plugin.

@@ -15,7 +15,7 @@
 #### 1. Creating a New LÖVE2D Project
 
 1. Open Acode’s file browser.
-2. Tap the **+** button → **New Project**.
+2. Tap the [**✚**] button → **New Project**.
 3. Select **LÖVE** from the template list.
 4. Name your project and create it.
 
@@ -35,7 +35,7 @@ The plugin will automatically generate:
 4. A `.love` file will be generated in your project root (e.g. `MyGame.love`).
 
 > [!Note]
-> If [Click Run](https://acode.app/plugin/acode.plugin.clickrun) is installed, simply click the **▶** button and select **Pack LÖVE**.
+> If [Click Run](https://acode.app/plugin/acode.plugin.clickrun) is installed, simply click the [**▶**] button and select **Pack LÖVE**.
 
 ---
 
