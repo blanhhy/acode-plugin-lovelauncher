@@ -3,7 +3,8 @@
   "acode-plugin": "plugin.json",
   "dependencies": {
     "acode-plugin-types": "^1.11.7-patch.2",
-    "fflate": "^0.8.2"
+    "fflate": "^0.8.2",
+    "ignore": "^7.0.10"
   },
   "devDependencies": {
     "archiver": "^7.0.1",

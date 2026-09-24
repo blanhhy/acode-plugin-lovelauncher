@@ -1,5 +1,6 @@
 import plugin from "../plugin.json";
 import { zipSync } from "fflate";
+import ignore from "ignore";
 
 const CLICK_RUN_PLUGIN_ID = "acode.plugin.clickrun";
 const openFolder = acode?.require("openFolder");
@@ -26,13 +27,7 @@ class LoveLauncher {
                 "conf.lua": await read("conf.lua"),
                 "main.lua": await read("main.lua"),
                 ".luarc.json": await read(".luarc.json"),
-                ".acode/PROJTYPE": "LOVE2D",
-                ".acode/pack_files.json": JSON.stringify([
-                    "conf.lua",
-                    "main.lua",
-                    "assets",
-                    "lib",
-                ]),
+                ".loveignore": await read(".loveignore"),
             };
         };
 
@@ -50,76 +45,68 @@ class LoveLauncher {
     }
 
     /**
-     * 递归将目录下所有文件添加到 dataMap
-     * @param {string} dirPath 目录绝对路径
-     * @param {string} baseUrl 项目根目录绝对路径（用于计算相对路径）
-     * @param {Map} dataMap 文件映射表
+     * 递归将未被 .loveignore 忽略的文件添加到 dataMap。
+     * @param {string} dirPath 当前目录路径
+     * @param {Record<string, Uint8Array>} dataMap 文件映射表
+     * @param {object} ignoreRules .loveignore 规则
+     * @param {string} relativeDir 当前目录相对于项目根目录的路径
      */
-    async addDirectoryToMap(dirPath, baseUrl, dataMap) {
+    async addDirectoryToMap(dirPath, dataMap, ignoreRules, relativeDir = "") {
         const dir = await FS(dirPath);
         const entries = await dir.lsDir();
         for (const entry of entries) {
             const fullPath = entry.url;
-            const relPath = fullPath.substring(baseUrl.length).replace(/^\/+/, "");
+            const relPath = relativeDir
+                ? `${relativeDir}/${entry.name}`
+                : entry.name;
+            const ignorePath = entry.isDirectory ? `${relPath}/` : relPath;
+
+            if (ignoreRules.ignores(ignorePath)) continue;
+
             if (entry.isFile) {
                 const fileFs = await FS(fullPath);
                 const content = await fileFs.readFile();
                 dataMap[relPath] = new Uint8Array(content);
             } else if (entry.isDirectory) {
-                await this.addDirectoryToMap(fullPath, baseUrl, dataMap);
+                await this.addDirectoryToMap(
+                    fullPath,
+                    dataMap,
+                    ignoreRules,
+                    relPath,
+                );
             }
         }
     }
 
     /**
-     * 根据配置文件收集需要打包的文件
+     * 根据 .loveignore 收集需要打包的文件
      * @param {string} baseUrl 项目根目录
      * @returns {Promise<Record<string, Uint8Array>>} 文件映射
      */
-    async collectFilesFromConfig(baseUrl) {
-        const configPath = Url.join(baseUrl, ".acode/pack_files.json");
-        const configFs = await FS(configPath);
-        const configExists = await configFs.exists();
-        if (!configExists) {
-            const errMsg = `Missing configuration file: ${configPath}\nPlease create it and list files/directories to include.`
-            alert("Packaging Failed", errMsg)
-            throw new Error(errMsg);
+    async collectFilesFromIgnore(baseUrl) {
+        const ignorePath = Url.join(baseUrl, ".loveignore");
+        const ignoreFs = await FS(ignorePath);
+        if (!(await ignoreFs.exists())) {
+            throw new Error(`Missing .loveignore file: ${ignorePath}`);
         }
 
-        let includeList;
+        const stat = await ignoreFs.stat();
+        if (!stat.isFile) {
+            throw new Error(`.loveignore is not a file: ${ignorePath}`);
+        }
+
+        let ignoreRules;
         try {
-            const content = await configFs.readFile("utf8");
-            includeList = JSON.parse(content);
-            if (!Array.isArray(includeList)) {
-                throw new Error("[LOVE Launcher] pack_files.json must contain an array of paths.");
-            }
+            const content = await ignoreFs.readFile("utf8");
+            ignoreRules = ignore().add(content);
         } catch (e) {
-            throw new Error(`[LOVE Launcher] Failed to parse pack_files.json: ${e.message}`);
+            throw new Error(
+                `[LOVE Launcher] Failed to parse .loveignore: ${e.message}`,
+            );
         }
 
         const dataMap = {};
-
-        for (const relPath of includeList) {
-            const absolutePath = Url.join(baseUrl, relPath);
-            const item = await FS(absolutePath);
-            const exists = await item.exists();
-            if (!exists) {
-                console.info(`[LOVE Launcher] Skipping non-existent path: ${relPath}`);
-                continue;
-            }
-
-            const stat = await item.stat();
-            if (stat.isFile) {
-                const content = await item.readFile();
-                const key = relPath.replace(/^\/+/, ""); // 去除'/'前缀
-                dataMap[key] = new Uint8Array(content);
-            } else if (stat.isDirectory) {
-                await this.addDirectoryToMap(absolutePath, baseUrl, dataMap);
-            } else {
-                console.warn(`[LOVE Launcher] Unknown entry type '${stat.type}', skipping: ${relPath}`);
-            }
-        }
-
+        await this.addDirectoryToMap(baseUrl, dataMap, ignoreRules);
         return dataMap;
     }
 
@@ -129,24 +116,24 @@ class LoveLauncher {
      */
     async packLove(baseUrl) {
         const projDir = await FS(baseUrl);
-        const dataMap = await this.collectFilesFromConfig(baseUrl);
+        const dataMap = await this.collectFilesFromIgnore(baseUrl);
         const zipData = zipSync(dataMap).buffer;
 
         const stat = await projDir.stat();
         const name = stat.name + ".love";
 
-        const outPath = Url.join(baseUrl,name);
+        const outPath = Url.join(baseUrl, name);
         const outFs = await FS(outPath);
 
         const existing = await outFs.exists();
         if (!existing) return projDir.createFile(name, zipData);
 
-        outFs.writeFile(zipData);
+        await outFs.writeFile(zipData);
         return outPath;
     }
 
     async checkProj(baseUrl) {
-        const url = Url.join(baseUrl, ".acode/PROJTYPE");
+        const url = Url.join(baseUrl, ".loveignore");
         const pt = await FS(url);
         const existing = await pt.exists();
         if (!existing) {
@@ -159,12 +146,7 @@ class LoveLauncher {
             console.log(stat);
             return false;
         }
-        const content = await pt.readFile("utf8");
-        if (!content) {
-            console.warn(`[Project] Failed to read ${url}`);
-            return false;
-        }
-        return content.includes("LOVE2D");
+        return true;
     }
 
     async packProj(folder = openFolder.find(editorManager.activeFile?.uri)) {
