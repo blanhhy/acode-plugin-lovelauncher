@@ -271,7 +271,7 @@ if (window.acode) {
         }
     }
     
-    const init = async (baseUrl, $page, options) => {
+    const init = (baseUrl, $page, options) => {
         if (!baseUrl.endsWith("/")) {
             baseUrl += "/";
         }
@@ -282,7 +282,7 @@ if (window.acode) {
         instance.initRunner();
     }
 
-    const destroy = async () => {
+    const destroy = () => {
         instance.destroyed = true;
         commands.removeCommand("lovelauncher.packlove");
         instance.disposeRunner?.();
