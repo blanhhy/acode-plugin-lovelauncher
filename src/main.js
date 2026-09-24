@@ -104,7 +104,7 @@ class LoveLauncher {
             const item = await FS(absolutePath);
             const exists = await item.exists();
             if (!exists) {
-                console.warn(`[LOVE Launcher] Path does not exist, skipping: ${relPath}`);
+                console.info(`[LOVE Launcher] Skipping non-existent path: ${relPath}`);
                 continue;
             }
 
@@ -116,7 +116,7 @@ class LoveLauncher {
             } else if (stat.isDirectory) {
                 await this.addDirectoryToMap(absolutePath, baseUrl, dataMap);
             } else {
-                console.warn(`[LOVE Launcher] Unknown entry type, skipping: ${relPath}`);
+                console.warn(`[LOVE Launcher] Unknown entry type '${stat.type}', skipping: ${relPath}`);
             }
         }
 
@@ -193,7 +193,7 @@ class LoveLauncher {
             folder.reload(); // 刷新文件列表
             return path
         } catch (e) {
-            console.error("[LOVE Launcher] Packaging error:", e);
+            console.error("[LOVE Launcher] Error packaging project:", e);
             alert(
                 "Packaging Failed",
                 `Project: ${folder.title}\nError: ${e.message}`,
@@ -202,25 +202,17 @@ class LoveLauncher {
         }
     }
 
-    initRunner() {
-        const runButton = acode.require("runButton");
-        if (runButton) {
-            this.useRunButton(runButton);
+    async initRunner() {
+        if (!await acode.waitForPlugin(CLICK_RUN_PLUGIN_ID)) {
+            console.info("[LOVE Launcher] Click Run is not installed, the run button is disabled");
             return;
         }
-        console.info("[LOVE Launcher] Click Run is not loaded yet, waiting for it...");
-        acode.waitForPlugin(CLICK_RUN_PLUGIN_ID)
-            .then(() => {
-                const api = acode.require("runButton");
-                if (api) {
-                    this.useRunButton(api);
-                } else {
-                    console.warn("[LOVE Launcher] Click Run is loaded but has no runButton module");
-                }
-            })
-            .catch(() => {
-                console.warn("[LOVE Launcher] Click Run is not installed, the run button is disabled");
-            });
+        const runButton = acode.require("runButton");
+        if (!runButton) {
+            console.warn("[LOVE Launcher] Click Run is loaded but has no runButton module");
+            return;
+        }
+        return this.useRunButton(runButton);
     }
 
     useRunButton(runButton) {
