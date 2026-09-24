@@ -8,6 +8,10 @@
 - A ready-to-use **LÖVE2D project template**
 - One-click **packaging** of your project into a `.love` file
 
+> [!WARNING]
+> Breaking change in `v1.0.3`,
+> See [changelog](changelog.md) for details and migration guide.
+
 ---
 
 ### Usage
@@ -22,10 +26,8 @@
 The plugin will automatically generate:
 - `main.lua`
 - `conf.lua`
-- `.acode/PROJTYPE` 
-  (project type marker)
-- `.acode/pack_files.json`
-  (packaging configuration)
+- `.luarc.json`
+- `.loveignore`
 
 #### 2. Packaging Your Project
 
@@ -39,46 +41,39 @@ The plugin will automatically generate:
 
 ---
 
-### Packaging Configuration
+### Packaging Ignore
 
-You can control which files and folders are included in the `.love` file by editing:
+You can control which files and folders are ignored when packaging by editing `.loveignore` file.
 
-```
-.acode/pack_files.json
-```
+It follows the **same rules** as Git's `.gitignore` file.
 
-**Default template content:**
+**Default content:**
 
-```json
-[
-  "conf.lua",
-  "main.lua",
-  "assets",
-  "lib"
-]
+```txt
+.*
+*.love
 ```
 
-**Rules:**
-- You can list individual files or entire directories.
-- Directories are added recursively.
-- Non-existent paths don't matter.
+This will ignore all hidden files and folders (e.g. `.git`, `.vscode`, `.luarc.json`, and `.loveignore` itself).
+
+You can add more patterns as needed.
 
 ---
 
 ### Requirements
 
-- The project must be opened in Acode.
-- The currently active file must belong to a LÖVE2D project.
 - Acode version `minVersionCode: 967` or higher.
+- [Click Run](https://acode.app/plugin/acode.plugin.clickrun) plugin for optional [**▶**] button.
 
 ---
 
 ### Limitations
 
-- **Cannot directly run** `.love` files in love-android (Acode currently does not support passing Content URIs to external activities).
-- Packaging is done purely in JavaScript using `fflate`.
+- **Cannot directly run** `.love` files in love-android.
 
-Future updates may add direct launching once Acode improves its API.
+> Acode currently does not support passing Content URIs to external activities.
+
+Future updates will add direct launching once Acode improves its API.
 
 ---
 
