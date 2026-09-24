@@ -10,7 +10,7 @@
 
 > [!WARNING]
 > Breaking change in `v1.0.3`,
-> See [changelog](changelog.md) for details and migration guide.
+> see [changelog](changelog.md) for details and migration guide.
 
 ---
 

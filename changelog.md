@@ -2,7 +2,7 @@
 
 - use `.loveignore` file to both ignore files when packaging and mark the project type as LÖVE 2D, instead of `pack_files.json` & `PROJTYPE`.
 
-> Migration Guide:
+> **Migration Guide**:\
 > Create a `.loveignore` file in your old project root.
 > e.g.:
 > ```txt
