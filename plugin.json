@@ -2,7 +2,7 @@
     "name": "LÖVE Launcher",
     "id": "acode.plugin.lovelauncher",
     "descridption": "create love2d projects and launch the love.apk in android.",
-    "keywords": ["lua", "love2d", "game", "dev", "project"],
+    "keywords": ["lua", "love", "love2d", "game", "lovelauncher"],
     "price": 0,
     
     "author": {

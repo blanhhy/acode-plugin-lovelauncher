@@ -53,6 +53,10 @@ The plugin will automatically generate:
 3. Type and select: **LÖVE Launcher: Pack current project**
 4. A `.love` file will be generated in your project root (e.g. `MyGame.love`).
 
+> [!Note]
+> If [Click Run](https://acode.app/plugin/acode.plugin.clickrun) is installed,
+> simply click the "Run" button and select "Pack LÖVE".
+
 ---
 
 ### Packaging Configuration

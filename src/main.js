@@ -243,7 +243,7 @@ class LoveLauncher {
         logInfo("registering the LÖVE project runner with Click Run");
         this.disposeRunner = runButton.registerProjectRunner({
             id: "lovelauncher.project",
-            name: "Run LÖVE",
+            name: "Pack LÖVE",
             runnable: (context) => this.checkLoveProject(context),
             run: (context) => this.runProj(context.folder),
         });
