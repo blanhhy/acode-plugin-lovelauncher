@@ -2,13 +2,15 @@ import plugin from "../plugin.json";
 import { zipSync } from "fflate";
 import ignore from "ignore";
 
-const CLICK_RUN_PLUGIN_ID = "acode.plugin.clickrun";
 const openFolder = acode?.require("openFolder");
 const commands = acode?.require("commands");
 const projects = acode?.require("projects");
+const confirm = acode?.require("confirm");
 const alert = acode?.require("alert");
 const Url = acode?.require("Url");
 const FS = acode?.require("fs");
+
+const CLICK_RUN_PLUGIN_ID = "acode.plugin.clickrun";
 
 class LoveLauncher {    
     async getAsset(name) {
@@ -201,22 +203,24 @@ class LoveLauncher {
         if (this.destroyed) return;
         console.info("[LOVE Launcher] registering the LÖVE project runner with Click Run");
 
-        const runnable = async (context) => !!context.folder && await this.checkProj(context.folder.url);
-        const packlove = async (context) => this.packProj(context.folder);
-        const runlove  = async (context) => this.runProj(context.folder);
-
-        this.disposeRunnerPack = runButton.registerProjectRunner({
-            id: "lovelauncher.project.pack",
-            name: "Pack LÖVE",
-            runnable: runnable,
-            run: packlove,
-        });
+        const runnable = async (cxt) => !!cxt.folder && await this.checkProj(cxt.folder.url);
+        const packlove = async (cxt) => this.packProj(cxt.folder);
+        const runlove  = async (cxt) => this.runProj(cxt.folder);
 
         this.disposeRunnerRun = runButton.registerProjectRunner({
             id: "lovelauncher.project.run",
             name: "Run LÖVE",
+            icon: "play_arrow",
             runnable: runnable,
             run: runlove,
+        });
+
+        this.disposeRunnerPack = runButton.registerProjectRunner({
+            id: "lovelauncher.project.pack",
+            name: "Pack LÖVE",
+            icon: "favorite",
+            runnable: runnable,
+            run: packlove,
         });
     }
 
@@ -270,6 +274,11 @@ if (window.acode) {
             if (key === "install_click_run") {
                 await acode.installPlugin(CLICK_RUN_PLUGIN_ID, plugin.name);
             } else if (key === "install_love_android") {
+                const isConfirm = await confirm(
+                    "Install LÖVE for Android",
+                    "You are about to download LÖVE for Android in GitHub Releases. Are you sure?",
+                );
+                if (!isConfirm) return;
                 const DOWNLOAD_URL = "https://github.com/love2d/love-android/releases/latest";
                 system.openInBrowser(DOWNLOAD_URL);
             }

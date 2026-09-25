@@ -39,10 +39,9 @@ The plugin will automatically generate:
 #### 3. Running Your Game
 
 1. Make sure you have installed [LÖVE for Android](https://github.com/love2d/love-android/releases/latest).
-2. Open the Command Palette.
-3. Type and select: **LÖVE Launcher: Run current project in LÖVE for Android**.
-4. You will see a app chooser, then select **LÖVE for Android**.
-5. The game will be launched on your Android device.
+2. Select **LÖVE Launcher: Run current project in LÖVE for Android** in the Command Palette.
+3. You will see an app chooser, then select **LÖVE for Android**.
+4. The game will be launched on your Android device.
 
 > [!Note]
 > If [Click Run](https://acode.app/plugin/acode.plugin.clickrun) is installed, simply click the [**▶**] button instead of using the command palette.
@@ -72,6 +71,7 @@ You can add more patterns as needed.
 
 - Acode version `minVersionCode: 967` or higher.
 - [Click Run](https://acode.app/plugin/acode.plugin.clickrun) plugin for optional [**▶**] button.
+- [LÖVE for Android](https://github.com/love2d/love-android/releases/latest) installed for running game.
 
 ---
 
