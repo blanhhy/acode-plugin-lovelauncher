@@ -185,7 +185,7 @@ class LoveLauncher {
     }
 
     async initRunner() {
-        if (!await acode.waitForPlugin(CLICK_RUN_PLUGIN_ID)) {
+        try { await acode.waitForPlugin(CLICK_RUN_PLUGIN_ID); } catch {
             console.info("[LOVE Launcher] Click Run is not installed, the run button is disabled");
             return;
         }
