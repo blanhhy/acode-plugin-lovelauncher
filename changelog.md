@@ -1,3 +1,8 @@
+### `v1.0.4`
+
+- add a temporary implementation for running LÖVE.
+- fix run button registration issue.
+
 ### `v1.0.3`
 
 - use `.loveignore` file to both ignore files when packaging and mark the project type as LÖVE 2D, instead of `pack_files.json` & `PROJTYPE`.
