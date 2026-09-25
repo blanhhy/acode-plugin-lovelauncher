@@ -36,8 +36,16 @@ The plugin will automatically generate:
 3. Type and select: **LÖVE Launcher: Pack current project**
 4. A `.love` file will be generated in your project root (e.g. `MyGame.love`).
 
+#### 3. Running Your Game
+
+1. Make sure you have installed [LÖVE for Android](https://github.com/love2d/love-android/releases/latest).
+2. Open the Command Palette.
+3. Type and select: **LÖVE Launcher: Run current project in LÖVE for Android**.
+4. You will see a app chooser, then select **LÖVE for Android**.
+5. The game will be launched on your Android device.
+
 > [!Note]
-> If [Click Run](https://acode.app/plugin/acode.plugin.clickrun) is installed, simply click the [**▶**] button and select **Pack LÖVE**.
+> If [Click Run](https://acode.app/plugin/acode.plugin.clickrun) is installed, simply click the [**▶**] button instead of using the command palette.
 
 ---
 
@@ -69,9 +77,9 @@ You can add more patterns as needed.
 
 ### Limitations
 
-- **Cannot directly run** `.love` files in love-android.
+- **Cannot directly run**:
 
-> Acode currently does not support passing Content URIs to external activities.
+Acode currently does not support passing content URI to a specific external activity. So you have to choose LÖVE for Android every time.
 
 Future updates will add direct launching once Acode improves its API.
 

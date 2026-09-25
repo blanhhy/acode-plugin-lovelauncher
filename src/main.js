@@ -202,26 +202,36 @@ class LoveLauncher {
         console.info("[LOVE Launcher] registering the LÖVE project runner with Click Run");
 
         const runnable = async (context) => !!context.folder && await this.checkProj(context.folder.url);
-        const run = async (context) => this.runProj(context.folder);
+        const packlove = async (context) => this.packProj(context.folder);
+        const runlove  = async (context) => this.runProj(context.folder);
 
-        this.disposeRunner = runButton.registerProjectRunner({
-            id: "lovelauncher.project",
+        this.disposeRunnerPack = runButton.registerProjectRunner({
+            id: "lovelauncher.project.pack",
             name: "Pack LÖVE",
             runnable: runnable,
-            run: run,
+            run: packlove,
+        });
+
+        this.disposeRunnerRun = runButton.registerProjectRunner({
+            id: "lovelauncher.project.run",
+            name: "Run LÖVE",
+            runnable: runnable,
+            run: runlove,
         });
     }
 
-    // TODO: 实现love.js集成
-    // TODO: 给acode增加能构造Content Uri的api以使用love-android App
     async runProj(folder) {
         const path = await this.packProj(folder);
         if (!path) { return; }
         const name = Url.basename(path);
-        alert(
-            "WIP: Running LÖVE",
-            `Packaging Successful! Your .love file is ${name}.\n\nHowever, running .love is still under development.`
-        )
+        // 弹出一个选择器，需要手动选择 LÖVE for Android
+        // Acode 正在考虑添加指定 Activity 的功能
+        system.fileAction(path, name, "VIEW", "application/x-love-game", () => {
+            alert(
+                "Running Failed",
+                "Packaging was successful, but file action failed."
+            )
+        });
     }
     
     initCommand() {
@@ -229,6 +239,11 @@ class LoveLauncher {
             name: "lovelauncher.packlove",
             description: "LÖVE Launcher: Pack current project",
             exec: () => this.packProj(),
+        });
+        commands.addCommand({
+            name: "lovelauncher.runlove",
+            description: "LÖVE Launcher: Run current project in LÖVE for Android",
+            exec: () => this.runProj(),
         });
     }
 }
@@ -245,10 +260,18 @@ if (window.acode) {
                 text: "Install Click Run",
                 info: "Use Click Run to show the run button",
             },
+            {
+                key: "install_love_android",
+                text: "Install LÖVE for Android",
+                info: "Use LÖVE for Android to run the game",
+            },
         ],
         cb: async (key) => {
             if (key === "install_click_run") {
                 await acode.installPlugin(CLICK_RUN_PLUGIN_ID, plugin.name);
+            } else if (key === "install_love_android") {
+                const DOWNLOAD_URL = "https://github.com/love2d/love-android/releases/latest";
+                system.openInBrowser(DOWNLOAD_URL);
             }
         }
     }
@@ -267,7 +290,9 @@ if (window.acode) {
     const destroy = () => {
         instance.destroyed = true;
         commands.removeCommand("lovelauncher.packlove");
-        instance.disposeRunner?.();
+        commands.removeCommand("lovelauncher.runlove");
+        instance.disposeRunnerPack?.();
+        instance.disposeRunnerRun?.();
     }
     
     acode.setPluginInit(plugin.id, init, settings);
