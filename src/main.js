@@ -228,6 +228,15 @@ class LoveLauncher {
     async runProj(folder) {
         const path = await this.packProj(folder);
         if (!path) { return; }
+        if (!system.launchAppWithFile) {
+            system.fileAction(path, Url.basename(path), "VIEW", "application/x-love-game", () => {
+                alert(
+                    "Running Failed",
+                    "Packaging was successful, but file action failed."
+                )
+            });
+            return;
+        }
         system.launchAppWithFile({
             app: "org.love2d.android",
             className: "org.love2d.android.GameActivity",
