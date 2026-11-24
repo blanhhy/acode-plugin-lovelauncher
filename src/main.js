@@ -121,9 +121,9 @@ class LoveLauncher {
         const projDir = await FS(baseUrl);
         const dataMap = await this.collectFilesFromIgnore(baseUrl);
         const zipData = await new Promise((resolve, reject) => {
-            zip(dataMap, (err, data) => {
+            zip(dataMap, (err, bytes) => {
                 if (err) reject(err);
-                else resolve(data);
+                else resolve(bytes.buffer);
             });
         });
 
