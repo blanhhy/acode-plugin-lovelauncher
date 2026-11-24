@@ -13,7 +13,10 @@ const FS = acode?.require("fs");
 
 const CLICK_RUN_PLUGIN_ID = "acode.plugin.clickrun";
 
-class LoveLauncher {    
+class LoveLauncher {
+    /**
+     * @param {string} name
+     */
     async getAsset(name) {
         const res = await fetch(`${this.baseUrl}assets/${name}`);
         return res;
@@ -89,8 +92,10 @@ class LoveLauncher {
     async collectFilesFromIgnore(baseUrl) {
         const ignorePath = Url.join(baseUrl, ".loveignore");
         const ignoreFs = await FS(ignorePath);
-        if (!(await ignoreFs.exists())) {
-            throw new Error(`Missing .loveignore file: ${ignorePath}`);
+        if (!(await ignoreFs.exists())) { // 怎么处理其实无关紧要，因为缺失.loveignore不会识别为LOVE项目
+            const template = await FS(`${this.baseUrl}assets/templates/.loveignore`);
+            await template.copyTo(ignorePath);
+            console.warn(`Missing .loveignore file: ${ignorePath}, populated with defaults.`);
         }
 
         const stat = await ignoreFs.stat();
@@ -140,6 +145,9 @@ class LoveLauncher {
         return outPath;
     }
 
+    /**
+     * @param {string} baseUrl
+     */
     async checkProj(baseUrl) {
         const url = Url.join(baseUrl, ".loveignore");
         const pt = await FS(url);
