@@ -6,6 +6,7 @@ const openFolder = acode?.require("openFolder");
 const commands = acode?.require("commands");
 const projects = acode?.require("projects");
 const confirm = acode?.require("confirm");
+const toast = acode?.require("toast");
 const alert = acode?.require("alert");
 const Url = acode?.require("Url");
 const FS = acode?.require("fs");
@@ -172,8 +173,9 @@ class LoveLauncher {
         }
 
         try {
+            toast("Packaging starting...", 3000);
             const path = await this.packLove(baseUrl);
-            toast("Packaging LOVE successful!", 3000);
+            toast("Packaging successful!", 3000);
             folder.reload(); // 刷新文件列表
             return path
         } catch (e) {
@@ -227,15 +229,30 @@ class LoveLauncher {
     async runProj(folder) {
         const path = await this.packProj(folder);
         if (!path) { return; }
-        const name = Url.basename(path);
-        // 弹出一个选择器，需要手动选择 LÖVE for Android
-        // Acode 正在考虑添加指定 Activity 的功能
-        system.fileAction(path, name, "VIEW", "application/x-love-game", () => {
-            alert(
-                "Running Failed",
-                "Packaging was successful, but file action failed."
-            )
-        });
+        if (!system.launchAppWithFile) {
+            system.fileAction(path, Url.basename(path), "VIEW", "application/x-love-game", () => {
+                alert(
+                    "Running Failed",
+                    "Packaging was successful, but file action failed."
+                )
+            });
+            return;
+        }
+        system.launchAppWithFile({
+            app: "org.love2d.android",
+            className: "org.love2d.android.GameActivity",
+            fileUri: path,
+            mimeType: "application/x-love-game",
+        },
+            (result) => console.log(result.uris, result.component), 
+            (err) => {
+                alert(
+                    "Running Failed",
+                    "Packaging was successful, but launching love2d failed."
+                )
+                console.error(err);
+            }
+        );
     }
     
     initCommand() {
