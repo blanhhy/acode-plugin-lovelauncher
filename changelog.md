@@ -1,3 +1,8 @@
+### `v1.0.5`
+
+- use `launchAppWithFile` (if available) to launch love-android app directly.
+- switch to async `zip` to avoid UI blocking.
+
 ### `v1.0.4`
 
 - add a temporary implementation for running LÖVE.
