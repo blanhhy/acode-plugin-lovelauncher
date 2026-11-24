@@ -173,8 +173,9 @@ class LoveLauncher {
         }
 
         try {
+            toast("Packaging starting...", 3000);
             const path = await this.packLove(baseUrl);
-            toast("Packaging LOVE successful!", 3000);
+            toast("Packaging successful!", 3000);
             folder.reload(); // 刷新文件列表
             return path
         } catch (e) {
