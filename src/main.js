@@ -1,5 +1,5 @@
 import plugin from "../plugin.json";
-import { zipSync } from "fflate";
+import { zip } from "fflate";
 import ignore from "ignore";
 
 const openFolder = acode?.require("openFolder");
@@ -120,7 +120,12 @@ class LoveLauncher {
     async packLove(baseUrl) {
         const projDir = await FS(baseUrl);
         const dataMap = await this.collectFilesFromIgnore(baseUrl);
-        const zipData = zipSync(dataMap).buffer;
+        const zipData = await new Promise((resolve, reject) => {
+            zip(dataMap, (err, data) => {
+                if (err) reject(err);
+                else resolve(data);
+            });
+        });
 
         const stat = await projDir.stat();
         const name = stat.name + ".love";
